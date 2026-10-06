@@ -669,6 +669,8 @@ footer.page-foot{background:var(--rail);border-top:1px solid #d8d8d8;color:#444;
     </div>
   </div>
 </div>
+<script>/* Keep a module's sidebar fully visible below the bar: fixed sidebars start under it, sticky sidebars shrink to the visible height. */(()=>{const bar=document.querySelector('.isbar');if(!bar)return;const fit=()=>{const vis=Math.max(0,bar.offsetHeight-scrollY);document.querySelectorAll('body > aside, .rail').forEach(el=>{const pos=getComputedStyle(el).position;el.style.top=pos==='fixed'?vis+'px':'';el.style.height=pos==='sticky'?(innerHeight-vis)+'px':''})};addEventListener('scroll',fit,{passive:true});addEventListener('resize',fit);document.addEventListener('DOMContentLoaded',fit);addEventListener('load',fit);fit()})();</script>
+<!-- /IS shared top bar -->
 
 <div class="topbar">
   <div><div class="eyebrow">Module</div><h1>Vibe Coding</h1></div>
