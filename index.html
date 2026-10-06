@@ -618,6 +618,20 @@ a{color:var(--link-blue);text-underline-offset:3px}
 .lightbox{background:#1a1718}
 footer.page-foot{background:var(--rail);border-top:1px solid #d8d8d8;color:#444;font-size:.88rem}
 
+/* one part per view */
+.paged .container > section.block{display:none;padding-top:0}
+.paged .container > section.block.active{display:block}
+.paged.show-all .container > section.block,.paged.printing .container > section.block{display:block;padding-top:54px}
+.paged.show-all .container > section.block:first-of-type{padding-top:0}
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:40px;padding-top:20px}
+.pager-btn{display:inline-block;max-width:100%;font:900 .9rem Arial,Helvetica,sans-serif;padding:10px 16px;border:2px solid var(--ink);background:#fff;color:var(--ink);text-decoration:none}
+.pager-btn:hover{background:var(--yellow)}
+.pager-btn.dark{background:var(--ink);color:var(--yellow)}
+.pager-btn.dark:hover{background:var(--yellow);color:var(--ink)}
+.show-all .pager,.printing .pager{display:none}
+.show-all-btn{display:block;width:100%;margin-top:18px;font:900 .85rem Arial,Helvetica,sans-serif;padding:9px 12px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.show-all-btn:hover{background:var(--yellow)}
+.block > h2:focus{outline:none}
 @media(max-width:880px){
   .hero{padding:36px 18px 84px;clip-path:polygon(0 0,100% 0,100% 88%,80% 100%,0 94%)}
   .hero-inner{width:100%}
@@ -629,9 +643,35 @@ footer.page-foot{background:var(--rail);border-top:1px solid #d8d8d8;color:#444;
 </style>
 </head>
 <body>
+<!-- IS Learning Modules shared top bar: identical in every module; links back to the collection homepage -->
+<style id="isbar-style">
+.isbar{background:#231f20;color:#fff;border-bottom:7px solid #ffe600;font-family:Arial,Helvetica,sans-serif;position:relative;z-index:95}
+.isbar-in{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,56px);min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.isbar a{color:#fff;text-decoration:none}
+.isbar-home{display:flex;align-items:center;gap:12px}
+.isbar-tile{display:grid;place-items:center;width:34px;height:34px;background:#ffe600;color:#231f20;font-weight:900;font-size:13px;flex:0 0 34px}
+.isbar-home b{display:block;font-size:.95rem;line-height:1.2;font-weight:700}
+.isbar-home small{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#ffe600;line-height:1.4}
+.isbar-nav{display:flex;gap:22px}
+.isbar-nav a{font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.isbar a:hover{color:#ffe600}
+.isbar a:focus-visible{outline:3px solid #ffe600;outline-offset:3px}
+@media(max-width:700px){.isbar-in{min-height:52px;gap:12px}.isbar-nav a:not(.isbar-all){display:none}.isbar-home small{display:none}.isbar-tile{width:30px;height:30px;flex-basis:30px}.isbar-all{white-space:nowrap}}
+@media print{.isbar{display:none}}
+</style>
+<nav class="isbar" aria-label="Information Systems learning modules">
+  <div class="isbar-in">
+    <a class="isbar-home" href="https://mcahalane.github.io/IS-Learning-Modules/"><span class="isbar-tile" aria-hidden="true">IS</span><span><b>Information Systems</b><small>Plug &amp; Play Learning Modules</small></span></a>
+    <div class="isbar-nav">
+      <a class="isbar-all" href="https://mcahalane.github.io/IS-Learning-Modules/#modules">All modules</a>
+      <a href="https://mcahalane.github.io/IS-Learning-Modules/#plug-in">Plug it in</a>
+      <a href="https://mcahalane.github.io/IS-Learning-Modules/#why">Why this approach</a>
+    </div>
+  </div>
+</nav>
 
 <div class="topbar">
-  <div><div class="eyebrow">Information Systems</div><h1>Vibe Coding</h1></div>
+  <div><div class="eyebrow">Module</div><h1>Vibe Coding</h1></div>
   <button type="button" class="to-top-bar" id="to-top-bar" aria-label="Back to top of page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg><span>Top</span></button>
 </div>
 <button type="button" class="to-top-float" id="to-top-float" aria-label="Back to top of page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></button>
@@ -660,6 +700,7 @@ footer.page-foot{background:var(--rail);border-top:1px solid #d8d8d8;color:#444;
       <a href="#action">Top tips &amp; next steps</a>
       <a href="#resources">Resources</a>
     </nav>
+    <button type="button" class="show-all-btn" id="show-all" aria-pressed="false">Show all parts</button>
     <div class="rail-foot">
       <strong>How to use this page</strong>
       Skim in order first time through, then use it as a reference — jump straight to a term, a diagram or a prompt when you need it.
@@ -2430,17 +2471,61 @@ Please: explain the likely cause in plain English first, then suggest the smalle
     document.getElementById("agent-diagram").innerHTML = svg;
   })();
 
-  // ================= SCROLL SPY =================
-  var sections = document.querySelectorAll("section.block");
-  var navLinks = document.querySelectorAll("#railnav a");
-  function onScroll(){
-    var pos = window.scrollY + 120;
-    var current = sections[0];
-    for (var si=0; si<sections.length; si++){ if (sections[si].offsetTop <= pos) current = sections[si]; }
-    for (var ni=0; ni<navLinks.length; ni++){ navLinks[ni].classList.toggle("active", navLinks[ni].getAttribute("href") === "#"+current.id); }
+  // ================= ONE PART PER VIEW =================
+  document.body.classList.add("paged");
+  var sections = Array.prototype.slice.call(document.querySelectorAll(".container > section.block"));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll("#railnav a"));
+  var ids = sections.map(function(sec){ return sec.id; });
+  var label = {}; navLinks.forEach(function(a){ label[a.getAttribute("href").slice(1)] = a.textContent.replace(/^\d+ · /, ""); });
+  var current = ids[0];
+  function escT(t){ var d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+  sections.forEach(function(sec, i){
+    var nav = document.createElement("nav"); nav.className = "pager"; nav.setAttribute("aria-label", "Part navigation");
+    var prev = ids[i-1], next = ids[i+1];
+    nav.innerHTML = (prev ? "<a class='pager-btn' href='#"+prev+"'>← "+escT(label[prev]||"Previous")+"</a>" : "<span></span>") +
+      (next ? "<a class='pager-btn dark' href='#"+next+"'>Next: "+escT(label[next]||"Next")+" →</a>" : "");
+    sec.appendChild(nav);
+  });
+  function jump(y){ window.scrollTo({ top: y, left: 0, behavior: "instant" }); }
+  function reveal(e){ e.scrollIntoView({ behavior: "instant", block: "start" }); }
+  function contentTop(){ return document.querySelector(".container").getBoundingClientRect().top + window.scrollY - 10; }
+  function sectionOf(e){ while (e && !(e.matches && e.matches(".container > section.block"))) e = e.parentNode; return e; }
+  function show(id, o){
+    o = o || {};
+    if (ids.indexOf(id) < 0) id = ids[0];
+    current = id;
+    sections.forEach(function(sec){ sec.classList.toggle("active", sec.id === id); });
+    navLinks.forEach(function(a){ var on = a.getAttribute("href") === "#"+id; a.classList.toggle("active", on); if (on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+    if (!o.initial && location.hash !== "#"+id) history.replaceState(null, "", "#"+id);
+    if (o.scroll) jump(id === ids[0] ? 0 : contentTop());
+    if (o.focus){ var h = document.querySelector("#"+id+" > h2"); if (h){ h.setAttribute("tabindex","-1"); h.focus({ preventScroll: true }); } }
+    window.dispatchEvent(new Event("scroll"));
   }
-  document.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
+  document.addEventListener("click", function(e){
+    var a = e.target.closest('a[href^="#"]'); if (!a) return;
+    var id = a.getAttribute("href").slice(1), t = id && document.getElementById(id); if (!t) return;
+    var sec = sectionOf(t); if (!sec) return;
+    e.preventDefault();
+    if (document.body.classList.contains("show-all")){ reveal(t); history.replaceState(null, "", "#"+id); return; }
+    show(sec.id, { scroll: t === sec, focus: t === sec });
+    if (t !== sec) reveal(t);
+  });
+  window.addEventListener("hashchange", function(){ var sec = sectionOf(document.getElementById(location.hash.slice(1))); if (sec) show(sec.id, { scroll: true }); });
+  var allBtn = document.getElementById("show-all");
+  allBtn.addEventListener("click", function(){
+    var on = document.body.classList.toggle("show-all");
+    allBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    allBtn.textContent = on ? "Show one part at a time" : "Show all parts";
+    if (on) reveal(document.getElementById(current)); else show(current, { scroll: true });
+  });
+  window.addEventListener("beforeprint", function(){ document.body.classList.add("printing"); });
+  window.addEventListener("afterprint", function(){ document.body.classList.remove("printing"); });
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  var first = document.getElementById(location.hash.slice(1)), firstSec = sectionOf(first);
+  show(firstSec ? firstSec.id : ids[0], { initial: true });
+  function land(){ if (first && first !== firstSec) reveal(first); else jump(0); }
+  land();
+  window.addEventListener("load", function(){ requestAnimationFrame(function(){ setTimeout(land, 0); }); }, { once: true });
 })();
 </script>
 
